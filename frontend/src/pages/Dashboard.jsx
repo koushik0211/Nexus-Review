@@ -1,0 +1,80 @@
+import { Container, Group, Text, Badge, Box, Stack, Button } from '@mantine/core';
+
+import HeroSection from '../components/HeroSection';
+import LoadingState from '../components/LoadingState';
+import MetricsDashboard from '../components/MetricsDashboard';
+import FindingsList from '../components/FindingsList';
+import { useAnalyzePR } from '../hooks/useAnalyzePR';
+import { useAuth } from '../contexts/AuthContext';
+import { useState, useEffect } from 'react';
+import '../styles/Dashboard.css';
+
+export default function Dashboard() {
+  const { url, setUrl, loading: prLoading, result, error, executeAnalysis, reset } = useAnalyzePR();
+  const { user, logout } = useAuth();
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  return (
+    <Box className="dashboard-container">
+      <Box className="dashboard-static-glow-1" />
+      <Box className="dashboard-static-glow-2" />
+
+      <Box 
+        className="dashboard-interactive-glow"
+        style={{
+          '--mouse-x': `${mousePos.x}px`,
+          '--mouse-y': `${mousePos.y}px`
+        }}
+      />
+
+      <Box className="dashboard-content">
+        <Container size="lg" py="xl">
+          <Group justify="space-between" align="center" mb="xl">
+            <Group gap="xs">
+              <Text size="xl" fw={800} variant="gradient" gradient={{ from: 'blue', to: 'cyan', deg: 45 }} style={{ letterSpacing: '0.5px' }}>
+                NEXUS
+              </Text>
+            </Group>
+            <Group gap="md">
+              <Text size="sm" c="dimmed">{user?.email}</Text>
+              <Badge variant="outline" color="cyan" size="md" radius="sm">
+                Gemini Flash
+              </Badge>
+              <Button variant="light" color="red" size="xs" onClick={logout}>
+                Logout
+              </Button>
+            </Group>
+          </Group>
+
+          <Box py="xl">
+            {!result && !prLoading && (
+              <HeroSection 
+                url={url} 
+                setUrl={setUrl} 
+                onAnalyze={executeAnalysis} 
+                error={error} 
+              />
+            )}
+
+            {prLoading && <LoadingState />}
+
+            {result && !prLoading && (
+              <Stack gap="xl">
+                <MetricsDashboard result={result} onReset={reset} />
+                <FindingsList findings={result.findings} />
+              </Stack>
+            )}
+          </Box>
+        </Container>
+      </Box>
+    </Box>
+  );
+}

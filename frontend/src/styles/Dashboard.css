@@ -1,0 +1,47 @@
+.dashboard-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0B0C10 0%, #1A1B1E 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-static-glow-1 {
+  position: absolute;
+  top: -10%;
+  left: -5%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, var(--brand-blue-glow) 0%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(40px);
+  z-index: 0;
+}
+
+.dashboard-static-glow-2 {
+  position: absolute;
+  bottom: -10%;
+  right: -10%;
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(21,170,191,0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(60px);
+  z-index: 0;
+}
+
+.dashboard-interactive-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(600px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(34,139,230,0.12), transparent 40%);
+  z-index: 1;
+  pointer-events: none;
+  transition: background 0.1s ease;
+}
+
+.dashboard-content {
+  position: relative;
+  z-index: 2;
+}

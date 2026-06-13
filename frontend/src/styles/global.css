@@ -1,0 +1,27 @@
+:root {
+  --brand-blue: #228be6;
+  --brand-blue-dark: #1c7ed6;
+  --brand-blue-glow: rgba(34, 139, 230, 0.15);
+  
+  --glass-bg: rgba(20, 21, 27, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.05);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-color: #0b0c10;
+}
+
+.glass-panel {
+  background-color: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-color: var(--glass-border);
+}
+
+.input-glass {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
