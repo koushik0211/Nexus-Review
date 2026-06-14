@@ -8,6 +8,7 @@ class ReviewFinding(BaseModel):
     file: str
     line: str
     comment: str
+    confidence_score: int = 100
     original_code: str = ""
     suggested_code: str = ""
 

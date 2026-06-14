@@ -43,6 +43,13 @@ export default function FindingsList({ findings }) {
                   <Group wrap="nowrap">
                     <Box w={8} h={8} style={{ borderRadius: '50%', backgroundColor: `var(--mantine-color-${color}-6)` }} />
                     <Badge color={color} variant="dot" size="md">{sev.toUpperCase()}</Badge>
+                    
+                    {finding.confidence_score && (
+                      <Badge variant="light" color={finding.confidence_score > 85 ? 'teal' : finding.confidence_score > 60 ? 'yellow' : 'red'} size="xs">
+                        {finding.confidence_score}% Certain
+                      </Badge>
+                    )}
+
                     <Text ff="monospace" size="sm" fw={500} ml="sm">{finding.file}</Text>
                     <Text size="xs" c="dimmed">Line {finding.line}</Text>
                   </Group>
