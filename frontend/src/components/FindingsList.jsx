@@ -34,15 +34,15 @@ export default function FindingsList({ findings }) {
           {findings.map((finding, idx) => {
             const sev = finding.severity?.toLowerCase() || 'info';
             let color = 'blue';
-            if (sev === 'critical') { color = 'red'; }
-            else if (sev === 'warning') { color = 'yellow'; }
+            if (['critical', 'high', 'error'].includes(sev)) { color = 'red'; }
+            else if (['warning', 'medium'].includes(sev)) { color = 'yellow'; }
+            else if (['suggestion', 'low', 'info'].includes(sev)) { color = 'cyan'; }
 
             return (
-              <Accordion.Item key={idx} value={idx.toString()} className="glass-panel">
+              <Accordion.Item key={idx} value={idx.toString()} className="glass-panel" style={{ backgroundColor: 'rgba(0,0,0,0.3)', borderColor: 'rgba(255,255,255,0.05)' }}>
                 <Accordion.Control>
                   <Group wrap="nowrap">
-                    <Box w={8} h={8} style={{ borderRadius: '50%', backgroundColor: `var(--mantine-color-${color}-6)` }} />
-                    <Badge color={color} variant="dot" size="md">{sev.toUpperCase()}</Badge>
+                    <Badge color={color} variant="light">{finding.severity}</Badge>
                     
                     {finding.confidence_score && (
                       <Badge variant="light" color={finding.confidence_score > 85 ? 'teal' : finding.confidence_score > 60 ? 'yellow' : 'red'} size="xs">
@@ -50,8 +50,9 @@ export default function FindingsList({ findings }) {
                       </Badge>
                     )}
 
-                    <Text ff="monospace" size="sm" fw={500} ml="sm">{finding.file}</Text>
-                    <Text size="xs" c="dimmed">Line {finding.line}</Text>
+                    <Text size="sm" fw={600} style={{ fontFamily: 'monospace', color: 'var(--mantine-color-blue-3)' }} ml="sm">
+                      {finding.file} {finding.line ? `(L${finding.line})` : ''}
+                    </Text>
                   </Group>
                 </Accordion.Control>
                 <Accordion.Panel>

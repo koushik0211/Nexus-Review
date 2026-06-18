@@ -6,3 +6,11 @@ langchain==1.3.9
 langchain-google-genai==4.2.5
 langchain-text-splitters
 python-dotenv==1.2.2
+langgraph
+langgraph-checkpoint-postgres
+psycopg-binary
+psycopg-pool
+
+langchain-community
+beautifulsoup4
+langchain-openai
