@@ -120,7 +120,7 @@ export const HitlReviewBoard = ({ initialFindings, onSubmit }) => {
                       autoFocus
                     />
                   ) : (
-                    <Text fw={400} size="sm" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6, color: 'var(--mantine-color-gray-4)' }} onClick={() => setEditingIndex(idx)} style={{ cursor: 'pointer' }}>
+                    <Text fw={400} size="sm" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6, color: 'var(--mantine-color-gray-4)', cursor: 'pointer' }} onClick={() => setEditingIndex(idx)}>
                       {formatText(finding.comment)}
                     </Text>
                   )}

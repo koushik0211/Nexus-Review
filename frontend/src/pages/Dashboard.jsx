@@ -34,7 +34,7 @@ export default function Dashboard() {
 
   return (
     <Box className="dashboard-container" style={{ position: 'relative', overflow: 'hidden' }}>
-      <Box style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+      <Box style={{ position: 'fixed', inset: 0, zIndex: 0 }}>
         <DotField
           dotRadius={1.5}
           dotSpacing={12}
