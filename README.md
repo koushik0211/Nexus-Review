@@ -14,6 +14,7 @@ Nexus Review is an enterprise-grade, automated code review platform. Simply past
 - **High-Speed Parallel Batching**: Time complexity is slashed from O(N) to O(1) by executing file chunk analyses concurrently across multiple threads via LangChain Batching.
 - **Deep GitHub Context Extraction**: Automatically fetches not just the raw diff, but the PR Title, Description, and the full text of any linked GitHub Issues (e.g., "Fixes #123") to give the LLM perfect context.
 - **Multi-Model Support**: Seamlessly swap between OpenAI (`gpt-4o`) and Google (`gemini-2.5-flash`) architectures via the frontend UI.
+- **Interactive AI Chat Assistant**: Includes a built-in context-aware AI chat drawer to discuss your PR findings in real-time, ask for code explanations, or get customized refactoring suggestions.
 - **Real-Time Streaming Terminal UI**: Instead of static loading screens, the backend uses Server-Sent Events (SSE) to stream live terminal logs directly to an interactive React terminal window.
 - **Premium UI/UX**: High-performance React frontend featuring a stunning interactive `DotField` particle background, glassmorphism, dynamic cursor-tracking radial gradients, and fluid CSS animations.
 - **Zero-Config Deployment**: A native `vercel.json` is included, instantly transforming the FastAPI backend into Vercel Serverless Functions and hosting the React frontend on the same domain without CORS issues.
@@ -70,6 +71,8 @@ Create a `.env` file in the **root** directory.
 GITHUB_TOKEN=your_personal_access_token
 OPENAI_API_KEY=your_openai_api_key
 GOOGLE_API_KEY=your_gemini_api_key
+
+GITLAB_TOKEN=your_gitlab_personal_access_token
 
 # Supabase Postgres Checkpointer (Must be Transaction Pooler port 6543)
 SUPABASE_DB_URL=postgresql://postgres.xxx:PASSWORD@aws-0-pooler.supabase.com:6543/postgres

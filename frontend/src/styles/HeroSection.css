@@ -1,24 +1,123 @@
 .hero-center {
-  min-height: 65vh;
+  min-height: 75vh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .hero-title {
-  font-size: 7rem !important;
-  letter-spacing: 4px;
+  font-size: clamp(4rem, 8vw, 8rem) !important;
+  letter-spacing: 8px;
   font-weight: 900;
-  line-height: 1;
-  background-size: 200% auto !important;
-  animation: gradientFlow 4s ease infinite;
+  line-height: 1.1;
+  background-size: 300% auto !important;
+  animation: gradientFlow 8s ease infinite;
+  text-shadow: 0 0 40px rgba(51, 154, 240, 0.3);
+  margin-bottom: 0.5rem;
 }
 
 @keyframes gradientFlow {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.02) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.5s ease, border-color 0.5s ease;
+  animation: float 6s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-20deg);
+  animation: shine 8s infinite;
+}
+
+@keyframes shine {
+  0% { left: -100%; }
+  20% { left: 200%; }
+  100% { left: 200%; }
+}
+
+.glass-panel:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px 0 rgba(51, 154, 240, 0.15), inset 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+  100% { transform: translateY(0px); }
+}
+
+.input-glass {
+  background: rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+  transition: all 0.3s ease;
+}
+
+.input-glass:focus {
+  border-color: rgba(51, 154, 240, 0.6) !important;
+  box-shadow: 0 0 20px rgba(51, 154, 240, 0.2) !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+}
+
+.analyze-btn {
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  box-shadow: 0 4px 15px rgba(51, 154, 240, 0.3) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.analyze-btn:hover:not(:disabled) {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 25px rgba(51, 154, 240, 0.5) !important;
+}
+
+.badge-animated {
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  cursor: default;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(4px);
+}
+
+.badge-animated:hover {
+  transform: scale(1.15) translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.pulse-badge {
+  animation: pulse 2.5s infinite cubic-bezier(0.66, 0, 0, 1);
+  box-shadow: 0 0 0 0 rgba(51, 154, 240, 0.4);
+}
+
+@keyframes pulse {
+  to {
+    box-shadow: 0 0 0 15px rgba(51, 154, 240, 0);
   }
 }

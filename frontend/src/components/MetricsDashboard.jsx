@@ -1,83 +1,134 @@
-import { SimpleGrid, Card, Text, Group, Button, Title, Code } from '@mantine/core';
-
-const formatText = (text) => {
-  if (!text) return null;
-  const parts = text.split(/(`[^`]+`)/g);
-  return parts.map((part, index) => {
-    if (part.startsWith('`') && part.endsWith('`')) {
-      return <Code key={index} fz="sm" c="cyan.4" bg="dark.7">{part.slice(1, -1)}</Code>;
-    }
-    if (part.includes('*')) {
-      const boldParts = part.split(/(\*[^*]+\*)/g);
-      return boldParts.map((bp, i) => {
-        if (bp.startsWith('*') && bp.endsWith('*')) {
-          return <span key={`${index}-${i}`} style={{ fontWeight: 'bold' }}>{bp.slice(1, -1)}</span>;
-        }
-        return <span key={`${index}-${i}`}>{bp}</span>;
-      });
-    }
-    return <span key={index}>{part}</span>;
-  });
-};
+import { SimpleGrid, Card, Text, Group, Button, Title, Box, ThemeIcon, Badge, Divider } from '@mantine/core';
+import { IconArrowLeft, IconCheck, IconX, IconMessageCircle, IconBug, IconAlertTriangle, IconInfoCircle, IconListCheck } from '@tabler/icons-react';
+import { formatText } from '../utils/formatters';
 
 export default function MetricsDashboard({ result, onReset }) {
   const getVerdictProps = (rec) => {
-    if (!rec) return { color: 'gray', title: 'Unknown' };
-    if (rec.includes('Approve')) return { color: 'teal', title: 'Approved' };
-    if (rec.includes('Request Changes')) return { color: 'red', title: 'Changes Requested' };
-    return { color: 'yellow', title: 'Needs Discussion' };
+    if (!rec) return { color: 'gray.5', title: 'Unknown', icon: <IconMessageCircle size={24} /> };
+    if (rec.includes('Approve')) return { color: 'teal.5', bg: 'rgba(18, 184, 134, 0.1)', title: 'Approved', icon: <IconCheck size={28} /> };
+    if (rec.includes('Request Changes')) return { color: 'red.5', bg: 'rgba(250, 82, 82, 0.1)', title: 'Changes Requested', icon: <IconX size={28} /> };
+    return { color: 'yellow.5', bg: 'rgba(252, 196, 25, 0.1)', title: 'Needs Discussion', icon: <IconMessageCircle size={28} /> };
   };
 
   const findings = result.findings || [];
-  const critical = findings.filter(f => f.severity?.toLowerCase() === 'critical').length;
+  const critical = findings.filter(f => f.severity?.toLowerCase() === 'critical' || f.severity?.toLowerCase() === 'error').length;
   const warnings = findings.filter(f => f.severity?.toLowerCase() === 'warning').length;
-  const suggestions = findings.filter(f => f.severity?.toLowerCase() === 'suggestion').length;
+  const suggestions = findings.filter(f => f.severity?.toLowerCase() === 'suggestion' || f.severity?.toLowerCase() === 'info').length;
+
+  const verdictProps = getVerdictProps(result.recommendation);
 
   return (
-    <>
+    <Box mt="xl">
       <Group justify="space-between" align="center" mb="xl">
-        <Button variant="default" onClick={onReset} className="glass-panel">
-          ← New Analysis
+        <Button 
+          variant="filled" 
+          size="md"
+          radius="md"
+          onClick={onReset} 
+          leftSection={<IconArrowLeft size={20} />}
+          styles={{ 
+            root: { 
+              backgroundColor: '#25262B', 
+              color: '#C1C2C5', 
+              border: '1px solid rgba(255,255,255,0.05)',
+              fontWeight: 500,
+              fontSize: '15px',
+              padding: '0 20px',
+              '&:hover': { backgroundColor: '#2C2E33', color: '#fff' } 
+            } 
+          }}
+        >
+          New Analysis
         </Button>
-        <Title order={2}>Analysis Complete</Title>
       </Group>
 
       <SimpleGrid cols={{ base: 1, md: 3 }} spacing="lg" mb="xl">
-        <Card shadow="sm" padding="lg" radius="md" withBorder className="glass-panel">
-          <Text size="sm" c="dimmed" tt="uppercase" fw={700} mb="xs">
-            Verdict
+        {/* Verdict Card */}
+        <Card 
+          padding="xl" 
+          radius="lg" 
+          withBorder 
+          bg="#1A1B1E"
+          style={{ borderColor: 'rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}
+        >
+          <Text size="sm" c="gray.5" tt="uppercase" fw={600} letterSpacing="1px" mb="md">
+            Final Verdict
           </Text>
-          <Text size="xl" fw={900} c={getVerdictProps(result.recommendation).color}>
+          <ThemeIcon 
+            size={64} 
+            radius="100%" 
+            variant="light" 
+            color={verdictProps.color.split('.')[0]} 
+            style={{ backgroundColor: verdictProps.bg }}
+            mb="md"
+          >
+            {verdictProps.icon}
+          </ThemeIcon>
+          <Text size="xl" fw={800} c={verdictProps.color} ta="center">
             {result.recommendation}
           </Text>
         </Card>
 
-        <Card shadow="sm" padding="lg" radius="md" withBorder className="glass-panel" style={{ gridColumn: 'span 2' }}>
-          <Text size="sm" c="dimmed" tt="uppercase" fw={700} mb="xs">
-            Summary
+        {/* Summary Card */}
+        <Card 
+          padding="xl" 
+          radius="lg" 
+          withBorder 
+          bg="#1A1B1E"
+          style={{ gridColumn: 'span 2', borderColor: 'rgba(255,255,255,0.08)' }}
+        >
+          <Group gap="xs" mb="lg">
+            <IconListCheck size={20} color="#4dabf7" />
+            <Text size="sm" c="gray.4" tt="uppercase" fw={600} letterSpacing="1px">
+              Synthesis Summary
+            </Text>
+          </Group>
+          <Text size="md" fw={400} c="gray.2" style={{ lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+            {formatText(result.summary)}
           </Text>
-          <Text style={{ lineHeight: 1.6 }}>{formatText(result.summary)}</Text>
         </Card>
       </SimpleGrid>
 
+      <Title order={4} c="gray.3" mb="md" mt="xl" fw={600}>Identified Issues Breakdown</Title>
+      <Divider color="rgba(255,255,255,0.05)" mb="lg" />
+
       <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="lg">
-        <Card shadow="sm" p="lg" radius="md" withBorder ta="center" className="glass-panel">
-          <Text size="xl" fw={900}>{findings.length}</Text>
-          <Text size="sm" c="dimmed" fw={500}>Total Findings</Text>
+        {/* Total Stats */}
+        <Card p="lg" radius="md" withBorder bg="#1A1B1E" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+          <Group justify="space-between" mb="xs">
+            <Text size="sm" c="gray.5" fw={600} tt="uppercase">Total</Text>
+            <IconBug size={18} color="var(--mantine-color-gray-6)" />
+          </Group>
+          <Text size="2.5rem" fw={900} c="gray.2">{findings.length}</Text>
         </Card>
-        <Card shadow="sm" p="lg" radius="md" withBorder ta="center" className="glass-panel" style={{ borderColor: 'rgba(250, 82, 82, 0.3)' }}>
-          <Text size="xl" fw={900} c="red">{critical}</Text>
-          <Text size="sm" c="dimmed" fw={500}>Critical</Text>
+
+        {/* Critical Stats */}
+        <Card p="lg" radius="md" withBorder bg="#1A1B1E" style={{ borderColor: 'rgba(250, 82, 82, 0.3)', borderLeft: '4px solid var(--mantine-color-red-6)' }}>
+          <Group justify="space-between" mb="xs">
+            <Text size="sm" c="red.3" fw={600} tt="uppercase">Critical</Text>
+            <IconAlertTriangle size={18} color="var(--mantine-color-red-6)" />
+          </Group>
+          <Text size="2.5rem" fw={900} c="red.4">{critical}</Text>
         </Card>
-        <Card shadow="sm" p="lg" radius="md" withBorder ta="center" className="glass-panel" style={{ borderColor: 'rgba(252, 196, 25, 0.3)' }}>
-          <Text size="xl" fw={900} c="yellow">{warnings}</Text>
-          <Text size="sm" c="dimmed" fw={500}>Warnings</Text>
+
+        {/* Warning Stats */}
+        <Card p="lg" radius="md" withBorder bg="#1A1B1E" style={{ borderColor: 'rgba(252, 196, 25, 0.3)', borderLeft: '4px solid var(--mantine-color-yellow-5)' }}>
+          <Group justify="space-between" mb="xs">
+            <Text size="sm" c="yellow.3" fw={600} tt="uppercase">Warnings</Text>
+            <IconAlertTriangle size={18} color="var(--mantine-color-yellow-5)" />
+          </Group>
+          <Text size="2.5rem" fw={900} c="yellow.4">{warnings}</Text>
         </Card>
-        <Card shadow="sm" p="lg" radius="md" withBorder ta="center" className="glass-panel" style={{ borderColor: 'rgba(34, 139, 230, 0.3)' }}>
-          <Text size="xl" fw={900} c="blue">{suggestions}</Text>
-          <Text size="sm" c="dimmed" fw={500}>Suggestions</Text>
+
+        {/* Suggestion Stats */}
+        <Card p="lg" radius="md" withBorder bg="#1A1B1E" style={{ borderColor: 'rgba(34, 139, 230, 0.3)', borderLeft: '4px solid var(--mantine-color-blue-5)' }}>
+          <Group justify="space-between" mb="xs">
+            <Text size="sm" c="blue.3" fw={600} tt="uppercase">Suggestions</Text>
+            <IconInfoCircle size={18} color="var(--mantine-color-blue-5)" />
+          </Group>
+          <Text size="2.5rem" fw={900} c="blue.4">{suggestions}</Text>
         </Card>
       </SimpleGrid>
-    </>
+    </Box>
   );
 }

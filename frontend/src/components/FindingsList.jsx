@@ -1,63 +1,80 @@
-import { Box, Title, Paper, Text, Accordion, Group, Badge, Code } from '@mantine/core';
+import { Box, Title, Paper, Text, Accordion, Group, Badge, Divider } from '@mantine/core';
 import CodeDiffViewer from './CodeDiffViewer';
-
-const formatText = (text) => {
-  if (!text) return null;
-  const parts = text.split(/(`[^`]+`)/g);
-  return parts.map((part, index) => {
-    if (part.startsWith('`') && part.endsWith('`')) {
-      return <Code key={index} fz="sm" c="cyan.4" bg="dark.7">{part.slice(1, -1)}</Code>;
-    }
-    if (part.includes('*')) {
-      const boldParts = part.split(/(\*[^*]+\*)/g);
-      return boldParts.map((bp, i) => {
-        if (bp.startsWith('*') && bp.endsWith('*')) {
-          return <span key={`${index}-${i}`} style={{ fontWeight: 'bold' }}>{bp.slice(1, -1)}</span>;
-        }
-        return <span key={`${index}-${i}`}>{bp}</span>;
-      });
-    }
-    return <span key={index}>{part}</span>;
-  });
-};
+import { formatText, getSeverityDetails } from '../utils/formatters';
 
 export default function FindingsList({ findings }) {
   return (
-    <Box>
-      <Title order={3} mb="md">Detailed Findings</Title>
+    <Box mt="xl">
+      <Title order={4} c="gray.3" mb="md" fw={600}>Detailed Findings</Title>
+      <Divider color="rgba(255,255,255,0.05)" mb="lg" />
+      
       {!findings || findings.length === 0 ? (
-        <Paper p="xl" withBorder radius="md" ta="center">
-          <Text size="lg" fw={500} c="teal">No issues found! The code looks great. 🎉</Text>
+        <Paper p="xl" withBorder radius="md" ta="center" bg="#1A1B1E" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+          <Text size="lg" fw={600} c="teal.5">No issues found! The code looks great. 🎉</Text>
         </Paper>
       ) : (
-        <Accordion variant="separated" radius="md">
+        <Accordion 
+          variant="separated" 
+          radius="lg"
+          styles={{
+            item: {
+              backgroundColor: '#1A1B1E',
+              border: '1px solid rgba(255,255,255,0.08)',
+              overflow: 'hidden'
+            },
+            control: {
+              padding: '16px',
+              '&:hover': {
+                backgroundColor: 'rgba(255,255,255,0.02)'
+              }
+            },
+            content: {
+              padding: '0 16px 24px 16px',
+            }
+          }}
+        >
           {findings.map((finding, idx) => {
-            const sev = finding.severity?.toLowerCase() || 'info';
-            let color = 'blue';
-            if (['critical', 'high', 'error'].includes(sev)) { color = 'red'; }
-            else if (['warning', 'medium'].includes(sev)) { color = 'yellow'; }
-            else if (['suggestion', 'low', 'info'].includes(sev)) { color = 'cyan'; }
+            const sevDetails = getSeverityDetails(finding.severity);
 
             return (
-              <Accordion.Item key={idx} value={idx.toString()} className="glass-panel" style={{ backgroundColor: 'rgba(0,0,0,0.3)', borderColor: 'rgba(255,255,255,0.05)' }}>
+              <Accordion.Item 
+                key={idx} 
+                value={idx.toString()} 
+                style={{ borderLeft: `4px solid var(--mantine-color-${sevDetails.color})` }}
+              >
                 <Accordion.Control>
-                  <Group wrap="nowrap">
-                    <Badge color={color} variant="light">{finding.severity}</Badge>
+                  <Group wrap="nowrap" gap="md">
+                    <Badge 
+                      color={sevDetails.color.split('.')[0]} 
+                      variant="light"
+                      size="md"
+                      radius="sm"
+                      leftSection={sevDetails.icon}
+                      styles={{ root: { backgroundColor: sevDetails.bg } }}
+                    >
+                      {finding.severity?.toUpperCase()}
+                    </Badge>
                     
                     {finding.confidence_score && (
-                      <Badge variant="light" color={finding.confidence_score > 85 ? 'teal' : finding.confidence_score > 60 ? 'yellow' : 'red'} size="xs">
+                      <Badge variant="outline" color={finding.confidence_score > 85 ? 'teal.6' : finding.confidence_score > 60 ? 'yellow.6' : 'red.6'} size="sm" radius="sm">
                         {finding.confidence_score}% Certain
                       </Badge>
                     )}
 
-                    <Text size="sm" fw={600} style={{ fontFamily: 'monospace', color: 'var(--mantine-color-blue-3)' }} ml="sm">
+                    <Badge 
+                      variant="outline" 
+                      color="gray.6" 
+                      size="md" 
+                      radius="sm"
+                      styles={{ root: { textTransform: 'none', fontFamily: 'monospace' } }}
+                    >
                       {finding.file} {finding.line ? `(L${finding.line})` : ''}
-                    </Text>
+                    </Badge>
                   </Group>
                 </Accordion.Control>
                 <Accordion.Panel>
-                  <Paper p="md" bg="rgba(0,0,0,0.3)">
-                    <Text mb="md" fw={400} style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+                  <Paper p="lg" bg="rgba(0,0,0,0.2)" radius="md" style={{ border: '1px solid rgba(255,255,255,0.03)' }}>
+                    <Text mb="xl" fw={400} c="gray.3" size="md" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.7 }}>
                       {formatText(finding.comment)}
                     </Text>
                     <CodeDiffViewer 

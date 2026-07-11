@@ -118,3 +118,19 @@ export const resumeAnalysis = async (threadId, findings, options, onLog) => {
 
   return resultData;
 };
+
+export const chatWithAI = async (message, findings, history, options) => {
+  const response = await fetch(`${API_BASE_URL}/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, findings, history, ...options }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || 'Chat request failed');
+  }
+
+  const data = await response.json();
+  return data.reply;
+};

@@ -14,3 +14,5 @@ psycopg-pool
 langchain-community
 beautifulsoup4
 langchain-openai
+
+python-gitlab
