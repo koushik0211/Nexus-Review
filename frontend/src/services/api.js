@@ -1,7 +1,8 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://127.0.0.1:8000/api' : '/api');
 
 export const analyzePR = async (url, options, onLog, onHitl) => {
-  const bodyData = { url, ...options };
+  const oauth_token = localStorage.getItem('nexus_oauth_token') || undefined;
+  const bodyData = { url, ...options, oauth_token };
   
   const response = await fetch(`${API_BASE_URL}/analyze`, {
     method: 'POST',
@@ -63,7 +64,8 @@ export const analyzePR = async (url, options, onLog, onHitl) => {
 };
 
 export const resumeAnalysis = async (threadId, findings, options, onLog) => {
-  const bodyData = { thread_id: threadId, findings, ...options };
+  const oauth_token = localStorage.getItem('nexus_oauth_token') || undefined;
+  const bodyData = { thread_id: threadId, findings, ...options, oauth_token };
   
   const response = await fetch(`${API_BASE_URL}/resume`, {
     method: 'POST',
@@ -120,10 +122,11 @@ export const resumeAnalysis = async (threadId, findings, options, onLog) => {
 };
 
 export const chatWithAI = async (message, findings, history, options) => {
+  const oauth_token = localStorage.getItem('nexus_oauth_token') || undefined;
   const response = await fetch(`${API_BASE_URL}/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message, findings, history, ...options }),
+    body: JSON.stringify({ message, findings, history, ...options, oauth_token }),
   });
 
   if (!response.ok) {
@@ -133,4 +136,20 @@ export const chatWithAI = async (message, findings, history, options) => {
 
   const data = await response.json();
   return data.reply;
+};
+
+export const applyFix = async (url, finding) => {
+  const oauth_token = localStorage.getItem('nexus_oauth_token') || undefined;
+  const response = await fetch(`${API_BASE_URL}/fix`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url, finding, oauth_token }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || 'Failed to apply fix');
+  }
+
+  return response.json();
 };

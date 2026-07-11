@@ -2,8 +2,8 @@ import os
 import re
 import gitlab
 
-def get_mr_diff(project_id, mr_iid):
-    token = os.getenv("GITLAB_TOKEN")
+def get_mr_diff(project_id, mr_iid, oauth_token=None):
+    token = oauth_token or os.getenv("GITLAB_TOKEN")
     url = os.getenv("GITLAB_URL", "https://gitlab.com")
     
     # Auth is optional for public repos, but token is used if provided
@@ -49,3 +49,33 @@ def get_mr_diff(project_id, mr_iid):
         "pr_context": pr_context,
         "urls": list(set(external_urls))
     }
+
+def apply_fix_gitlab(project_id, mr_iid, finding, oauth_token=None):
+    token = oauth_token or os.getenv("GITLAB_TOKEN")
+    url = os.getenv("GITLAB_URL", "https://gitlab.com")
+    
+    gl = gitlab.Gitlab(url, private_token=token)
+    project = gl.projects.get(project_id)
+    mr = project.mergerequests.get(mr_iid)
+    
+    source_project = gl.projects.get(mr.source_project_id)
+    branch = mr.source_branch
+    
+    try:
+        # Fetch file from the branch
+        f = source_project.files.get(file_path=finding.file, ref=branch)
+        decoded_content = f.decode().decode('utf-8')
+        
+        if finding.original_code not in decoded_content:
+            raise ValueError("Could not find the original code block in the file.")
+            
+        new_content = decoded_content.replace(finding.original_code, finding.suggested_code)
+        
+        short_comment = finding.title if finding.title else (finding.comment[:50] + ("..." if len(finding.comment) > 50 else ""))
+        commit_message = f"{short_comment} [by nexus-review]"
+        
+        f.content = new_content
+        f.save(branch=branch, commit_message=commit_message)
+        return True
+    except gitlab.exceptions.GitlabGetError:
+        raise ValueError(f"Could not find file {finding.file} in the MR branch.")

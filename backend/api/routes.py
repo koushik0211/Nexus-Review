@@ -7,9 +7,9 @@ import os
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 
-from backend.schemas.pr import AnalyzeRequest, AnalyzeResponse, ResumeRequest, ChatRequest
-from backend.services.github_client import get_pr_diff
-from backend.services.gitlab_client import get_mr_diff
+from backend.schemas.pr import AnalyzeRequest, AnalyzeResponse, ResumeRequest, ChatRequest, FixRequest
+from backend.services.github_client import get_pr_diff, apply_fix_github
+from backend.services.gitlab_client import get_mr_diff, apply_fix_gitlab
 from backend.services.agent import review_pr, resume_pr
 from backend.services.prompts import get_chat_system_prompt
 import urllib.parse
@@ -33,7 +33,7 @@ async def analyze_pr(request: AnalyzeRequest):
                 raise ValueError("Invalid GitLab MR URL format.")
             project_id = match.group(1) # python-gitlab handles the URL encoding internally
             mr_iid = int(match.group(2))
-            code_data = get_mr_diff(project_id, mr_iid)
+            code_data = get_mr_diff(project_id, mr_iid, oauth_token=request.oauth_token)
         else:
             # Assume GitHub
             match = re.search(r"github\.com/([^/]+)/([^/]+)/pull/(\d+)", url)
@@ -41,7 +41,7 @@ async def analyze_pr(request: AnalyzeRequest):
                 raise ValueError("Invalid URL format. Please paste a valid GitHub PR or GitLab MR URL.")
             repo_name = f"{match.group(1)}/{match.group(2)}"
             pr_number = int(match.group(3))
-            code_data = get_pr_diff(repo_name, pr_number)
+            code_data = get_pr_diff(repo_name, pr_number, oauth_token=request.oauth_token)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to fetch code from URL: {str(e)}")
         
@@ -119,3 +119,28 @@ async def chat_with_ai(request: ChatRequest):
         return {"reply": response.content}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Chat failed: {str(e)}")
+
+@router.post("/fix")
+async def apply_fix(request: FixRequest):
+    url = request.url
+    finding = request.finding
+    
+    try:
+        if "gitlab.com" in url or "-/merge_requests/" in url:
+            match = re.search(r"gitlab\.com/(.*?)/-/merge_requests/(\d+)", url)
+            if not match:
+                raise ValueError("Invalid GitLab MR URL format.")
+            project_id = match.group(1)
+            mr_iid = int(match.group(2))
+            apply_fix_gitlab(project_id, mr_iid, finding, oauth_token=request.oauth_token)
+        else:
+            match = re.search(r"github\.com/([^/]+)/([^/]+)/pull/(\d+)", url)
+            if not match:
+                raise ValueError("Invalid URL format. Please paste a valid GitHub PR URL.")
+            repo_name = f"{match.group(1)}/{match.group(2)}"
+            pr_number = int(match.group(3))
+            apply_fix_github(repo_name, pr_number, finding, oauth_token=request.oauth_token)
+            
+        return {"status": "success", "message": "Fix applied successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to apply fix: {str(e)}")

@@ -6,7 +6,7 @@ def get_review_prompt():
 Your primary goal is to identify CORE LOGIC BUGS, architectural flaws, security vulnerabilities, and severe performance bottlenecks. Do NOT focus on trivial styling or formatting issues unless they severely impact readability.
 When writing your comments, adopt a conversational, human tone. Clearly explain the technical "why" behind the issue and provide an obvious, actionable solution. Treat the developer with respect.
 If the code is functionally incorrect or fails to solve the described problem, flag it as a critical issue.
-Return ONLY a JSON list of findings: [{{"severity": "critical|warning|suggestion", "file": "filename", "line": "line_num", "comment": "conversational, human-toned technical explanation of the issue, why it matters, and exactly how to fix it", "confidence_score": integer between 1 and 100, "original_code": "the exact code block with the issue", "suggested_code": "the corrected code block"}}]"""),
+Return ONLY a JSON list of findings: [{{"title": "a short, one-sentence title for the fix", "severity": "critical|warning|suggestion", "file": "filename", "line": "line_num", "comment": "conversational, human-toned technical explanation of the issue, why it matters, and exactly how to fix it", "confidence_score": integer between 1 and 100, "original_code": "the exact code block with the issue", "suggested_code": "the corrected code block"}}]"""),
         ("user", "PR Context:\n{pr_context}\n\nExternal Research:\n{web_research}\n\nReview this code chunk with intense scrutiny:\n{chunk}")
     ])
 

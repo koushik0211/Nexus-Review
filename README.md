@@ -9,6 +9,8 @@
 Nexus Review is an enterprise-grade, automated code review platform. Simply paste a GitHub Pull Request URL, and our LangGraph-powered AI agent analyzes the raw diff to detect critical vulnerabilities, stylistic inconsistencies, and logic bugs instantly.
 
 ## ✨ Features
+- **Multi-Tenant OAuth Integration**: Securely authenticate via GitHub, GitLab, or Google. Nexus dynamically passes your personal OAuth tokens to the backend, enabling secure read/write access to your private repositories.
+- **Automated Auto-Fix Commits (Self-Healing PRs)**: Directly pushes AI-generated code fixes and custom commit messages to your remote GitHub/GitLab branches with a single click.
 - **LangGraph Multi-Agent Architecture**: Built on a highly modular node-based state machine, featuring web scraping, automated code analysis, and a self-healing JSON validation loop.
 - **Human-in-the-Loop (HITL) Checkpoints**: Powered by LangGraph's Supabase Postgres Checkpointer. The AI pauses execution mid-analysis to allow developers to review, edit, and curate the findings on a stunning UI board before synthesizing the final report.
 - **High-Speed Parallel Batching**: Time complexity is slashed from O(N) to O(1) by executing file chunk analyses concurrently across multiple threads via LangChain Batching.

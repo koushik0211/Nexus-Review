@@ -134,7 +134,7 @@ export default function Dashboard() {
             {result && !prLoading && !hitlPending && (
               <Stack gap="xl">
                 <MetricsDashboard result={result} onReset={reset} />
-                <FindingsList findings={result.findings} />
+                <FindingsList findings={result.findings} url={url} />
               </Stack>
             )}
           </Box>

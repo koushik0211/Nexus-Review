@@ -5,8 +5,10 @@ class AnalyzeRequest(BaseModel):
     provider: str | None = None
     model: str | None = None
     api_key: str | None = None
+    oauth_token: str | None = None
 
 class ReviewFinding(BaseModel):
+    title: str | None = None
     severity: str
     file: str
     line: str | int
@@ -21,12 +23,21 @@ class AnalyzeResponse(BaseModel):
     recommendation: str
     findings: list[ReviewFinding]
 
+class FixRequest(BaseModel):
+    url: str
+    finding: ReviewFinding
+    provider: str | None = None
+    model: str | None = None
+    api_key: str | None = None
+    oauth_token: str | None = None
+
 class ResumeRequest(BaseModel):
     thread_id: str
     findings: list[ReviewFinding]
     provider: str | None = None
     model: str | None = None
     api_key: str | None = None
+    oauth_token: str | None = None
 
 class ChatMessage(BaseModel):
     role: str  # "user" or "assistant"
@@ -39,3 +50,4 @@ class ChatRequest(BaseModel):
     provider: str | None = None
     model: str | None = None
     api_key: str | None = None
+    oauth_token: str | None = None

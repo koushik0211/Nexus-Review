@@ -1,8 +1,24 @@
-import { Box, Title, Paper, Text, Accordion, Group, Badge, Divider } from '@mantine/core';
+import { Box, Title, Paper, Text, Accordion, Group, Badge, Divider, Button } from '@mantine/core';
+import { useState } from 'react';
+import { IconWand } from '@tabler/icons-react';
 import CodeDiffViewer from './CodeDiffViewer';
 import { formatText, getSeverityDetails } from '../utils/formatters';
+import { applyFix } from '../services/api';
 
-export default function FindingsList({ findings }) {
+export default function FindingsList({ findings, url }) {
+  const [fixingState, setFixingState] = useState({});
+
+  const handleFix = async (idx, finding) => {
+    setFixingState(prev => ({ ...prev, [idx]: 'loading' }));
+    try {
+      await applyFix(url, finding);
+      setFixingState(prev => ({ ...prev, [idx]: 'success' }));
+    } catch (error) {
+      console.error(error);
+      setFixingState(prev => ({ ...prev, [idx]: 'error' }));
+    }
+  };
+
   return (
     <Box mt="xl">
       <Title order={4} c="gray.3" mb="md" fw={600}>Detailed Findings</Title>
@@ -82,6 +98,23 @@ export default function FindingsList({ findings }) {
                       suggestedCode={finding.suggested_code} 
                       language={finding.file?.split('.').pop() || 'javascript'} 
                     />
+                    
+                    {finding.suggested_code && finding.original_code && (
+                      <Group justify="flex-end" mt="md">
+                        <Button 
+                          variant={fixingState[idx] === 'success' ? 'filled' : 'gradient'}
+                          gradient={fixingState[idx] === 'success' ? undefined : { from: 'indigo', to: 'cyan' }}
+                          color={fixingState[idx] === 'success' ? 'teal' : fixingState[idx] === 'error' ? 'red' : 'blue'}
+                          leftSection={<IconWand size={16} />}
+                          loading={fixingState[idx] === 'loading'}
+                          onClick={() => handleFix(idx, finding)}
+                          style={{ pointerEvents: fixingState[idx] === 'success' ? 'none' : 'auto' }}
+                          radius="md"
+                        >
+                          {fixingState[idx] === 'success' ? 'Fixed!' : fixingState[idx] === 'error' ? 'Fix Failed' : 'Fix it for me'}
+                        </Button>
+                      </Group>
+                    )}
                   </Paper>
                 </Accordion.Panel>
               </Accordion.Item>

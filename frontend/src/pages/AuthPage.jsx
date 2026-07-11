@@ -1,16 +1,30 @@
 import { useEffect } from 'react';
-import { Title, Text, Box, Stack, Flex, Center, Container, ThemeIcon } from '@mantine/core';
+import { Title, Text, Box, Stack, Flex, Center, Container, ThemeIcon, Alert } from '@mantine/core';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '../services/supabase';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { IconShieldCheck, IconBolt, IconCode, IconCodeAsterix } from '@tabler/icons-react';
+import { IconShieldCheck, IconBolt, IconCode, IconCodeAsterix, IconInfoCircle } from '@tabler/icons-react';
+import { useState } from 'react';
 import '../styles/AuthPage.css';
 
 export default function AuthPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [showAlert, setShowAlert] = useState(false);
+
+  const handleInteraction = (e) => {
+    const target = e.target.closest('button, input');
+    if (!target) return;
+    
+    const isEmailInput = target.tagName === 'INPUT' && target.type === 'email';
+    const isGoogleButton = target.tagName === 'BUTTON' && target.textContent.includes('Google');
+    
+    if (isEmailInput || isGoogleButton) {
+      setShowAlert(true);
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -88,38 +102,47 @@ export default function AuthPage() {
             Please enter your details to sign in.
           </Text>
 
-          <Auth
-            supabaseClient={supabase}
-            appearance={{
-              theme: ThemeSupa,
-              variables: {
-                default: {
-                  colors: {
-                    brand: '#228be6',
-                    brandAccent: '#1c7ed6',
-                    messageText: '#fff',
-                    inputBackground: '#1A1B1E',
-                    inputBorder: '#373A40',
-                    inputBorderHover: '#228be6',
-                    inputBorderFocus: '#228be6',
-                  },
-                  radii: {
-                    borderRadiusButton: '8px',
-                    buttonBorderRadius: '8px',
-                    inputBorderRadius: '8px',
+          {showAlert && (
+            <Alert variant="light" color="blue" title="Private Repositories Note" icon={<IconInfoCircle />} mb="md" withCloseButton onClose={() => setShowAlert(false)}>
+              If you sign up with Email or Google, you will only be able to analyze <b>Public</b> pull requests. To analyze your own <b>Private</b> repositories and push auto-fixes, please sign in with GitHub or GitLab instead!
+            </Alert>
+          )}
+
+          <Box onClickCapture={handleInteraction}>
+            <Auth
+              supabaseClient={supabase}
+              appearance={{
+                theme: ThemeSupa,
+                variables: {
+                  default: {
+                    colors: {
+                      brand: '#228be6',
+                      brandAccent: '#1c7ed6',
+                      messageText: '#fff',
+                      inputBackground: '#1A1B1E',
+                      inputBorder: '#373A40',
+                      inputBorderHover: '#228be6',
+                      inputBorderFocus: '#228be6',
+                    },
+                    radii: {
+                      borderRadiusButton: '8px',
+                      buttonBorderRadius: '8px',
+                      inputBorderRadius: '8px',
+                    },
                   },
                 },
-              },
-              className: {
-                container: 'auth-container',
-                button: 'auth-button',
-                input: 'auth-input',
-              }
-            }}
-            theme="dark"
-            providers={['google']}
-            redirectTo={window.location.origin}
-          />
+                className: {
+                  container: 'auth-container',
+                  button: 'auth-button',
+                  input: 'auth-input',
+                }
+              }}
+              theme="dark"
+              providers={['github', 'gitlab', 'google']}
+              providerScopes={{ github: 'repo', gitlab: 'api' }}
+              redirectTo={window.location.origin}
+            />
+          </Box>
         </Container>
       </Box>
     </Flex>

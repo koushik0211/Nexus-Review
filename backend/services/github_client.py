@@ -2,8 +2,8 @@ import os
 import re
 from github import Github
 
-def get_pr_diff(repo_name, pr_number):
-    token = os.getenv("GITHUB_TOKEN")
+def get_pr_diff(repo_name, pr_number, oauth_token=None):
+    token = oauth_token or os.getenv("GITHUB_TOKEN")
     g = Github(token)
     
     repo = g.get_repo(repo_name)
@@ -44,3 +44,38 @@ def get_pr_diff(repo_name, pr_number):
         "pr_context": pr_context,
         "urls": list(set(external_urls))
     }
+
+def apply_fix_github(repo_name, pr_number, finding, oauth_token=None):
+    token = oauth_token or os.getenv("GITHUB_TOKEN")
+    g = Github(token)
+    
+    repo = g.get_repo(repo_name)
+    pr = repo.get_pull(pr_number)
+    
+    # Get the source branch of the PR
+    branch = pr.head.ref
+    head_repo = pr.head.repo
+    
+    # Fetch the file contents from that specific branch
+    file_content = head_repo.get_contents(finding.file, ref=branch)
+    decoded_content = file_content.decoded_content.decode('utf-8')
+    
+    # Apply the replacement
+    if finding.original_code not in decoded_content:
+        raise ValueError("Could not find the original code block in the file. It may have been modified.")
+        
+    new_content = decoded_content.replace(finding.original_code, finding.suggested_code)
+    
+    # Create the commit message based on the finding title or comment
+    short_comment = finding.title if finding.title else (finding.comment[:50] + ("..." if len(finding.comment) > 50 else ""))
+    commit_message = f"{short_comment} [by nexus-review]"
+    
+    # Push the commit
+    head_repo.update_file(
+        file_content.path,
+        commit_message,
+        new_content,
+        file_content.sha,
+        branch=branch
+    )
+    return True

@@ -11,6 +11,9 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.provider_token) {
+        localStorage.setItem('nexus_oauth_token', session.provider_token);
+      }
       setUser(session?.user ?? null);
       setLoading(false);
     });
@@ -18,6 +21,9 @@ export const AuthProvider = ({ children }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
         window.location.href = '/update-password';
+      }
+      if (session?.provider_token) {
+        localStorage.setItem('nexus_oauth_token', session.provider_token);
       }
       setUser(session?.user ?? null);
       setLoading(false);
@@ -39,6 +45,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
+    localStorage.removeItem('nexus_oauth_token');
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   };
